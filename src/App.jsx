@@ -1,16 +1,25 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import './App.css';
 
+const randomPosition = () => ({
+  x: Math.floor(Math.random() * 20),
+  y: Math.floor(Math.random() * 20),
+});
+const initialApple = randomPosition;
+const initialDirection = "right";
+const initialScore = 0;
+
 function App() {
-  const [snake, setSnake] = useState([{ x: 0, y: 0 }]);
-  const [apple, setApple] = useState([{ x: 5, y: 5 }]);
-  const [direction, setDirection] = useState("right");
-  const [over, setOver] = useState(false);
+  const [snake, setSnake] = useState([randomPosition()]);
+  const [apple, setApple] = useState(initialApple);
+  const [direction, setDirection] = useState(initialDirection);
+  const [isOver, setIsOver] = useState(false);
+  const [score, setScore] = useState(initialScore);
 
   useEffect(() => {
     // use keycode
     const handleKeyDown = ({ key }) => {
-      if (over && key === " ") {
+      if (isOver && key === " ") {
         restartGame();
       };
 
@@ -31,7 +40,7 @@ function App() {
 
   useEffect(() => {
     const timer = setInterval(() => {
-      if (over) return;
+      if (isOver) return;
       const head = { ...snake[0] };
 
       if (direction === "right") head.x += 1;
@@ -40,8 +49,16 @@ function App() {
       else if (direction === "down") head.y += 1;
 
       // hit the wall
-      if ( head.x > 19 || head.x < 0 || head.y > 19 || head.y < 0 || snake.some((body, index) => index !== 0 && body.x === head.x && body.y === head.y)) {
-        handleGameover();
+      if (
+        head.x > 19 ||
+        head.x < 0 ||
+        head.y > 19 ||
+        head.y < 0 ||
+        snake.some(
+          (body, index) => index !== 0 && body.x === head.x && body.y === head.y
+        )
+      ) {
+        handleGameisOver();
         return;
       }
       const snakeCopy = [head, ...snake];
@@ -61,13 +78,13 @@ function App() {
     return () => clearInterval(timer);
   }, [snake, direction]);
 
-  const handleGameover = () => {
+  const handleGameisOver = () => {
     setDirection("stop");
-    setOver(true);
+    setIsOver(true);
   };
 
   const restartGame = () => {
-    setOver(false);
+    setIsOver(false);
     setSnake([randomPosition()]);
     setApple(initialApple);
     setScore(initialScore);
@@ -96,6 +113,13 @@ function App() {
               })
           )}
       </div>
+      <div className="score">得分: {score}</div>
+      {isOver && (
+        <>
+          <div className="score">你死了ＱＱ</div>
+          <div className="score">按下"空白鍵"，再來一次吧</div>
+        </>
+      )}
     </div>
   );
 }
